@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تطبيق تسجيل المباريات</title>
+    <!-- تم إصلاح الخطأ: استخدام وسم <link> الصحيح لاستدعاء الخط -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background-color: #1a1a1a; /* خلفية داكنة جداً */
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            width: 100%;
+            max-width: 600px;
+            background-color: #2c2c2c; /* لون أغمق للحاوية */
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        }
+        .header {
+            background-color: #404040; /* لون هيدر داكن */
+            color: #f5f5f5; /* لون نص فاتح */
+            padding: 16px;
+            border-radius: 8px;
+            text-align: center;
+            margin-bottom: 24px;
+            font-weight: bold;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+        .header-text {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            font-size: 1.25rem;
+        }
+        .round-info {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        .section {
+            margin-bottom: 24px;
+        }
+        .section h2 {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #d4d4d4; /* لون نص فاتح للعناوين */
+            margin-bottom: 12px;
+            text-align: right;
+        }
+        .button-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+        .button {
+            padding: 16px;
+            border-radius: 8px;
+            border: none;
+            color: #f5f5f5;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.1s, box-shadow 0.1s;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            word-wrap: break-word;
+        }
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        .button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .button-hoah { background-color: #0e9680; } /* أخضر بحري هادئ */
+        .button-pro { background-color: #4682b4; } /* أزرق فولاذي هادئ */
+        .button-world { background-color: #6a5acd; } /* بنفسجي أزرق هادئ */
+        .button-gray { background-color: #404040; } /* رمادي داكن */
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 24px;
+        }
+        .controls button {
+            padding: 12px 20px;
+            border-radius: 8px;
+            border: none;
+            color: #f5f5f5;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .controls button:hover {
+            filter: brightness(1.1);
+        }
+        .controls .download-btn { background-color: #0e9680; } /* أخضر بحري هادئ */
+        .controls .reset-btn { background-color: #0e9680; } /* نفس لون زر التنزيل */
+        .footer {
+            margin-top: 20px;
+            text-align: center;
+            color: #a3a3a3; /* لون نص داكن */
+            font-size: 0.875rem;
+        }
+        .status-indicators {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 12px;
+        }
+        .status-indicator {
+            padding: 8px;
+            border-radius: 6px;
+            font-weight: bold;
+            color: white;
+            width: 30%;
+            text-align: center;
+        }
+        .status-indicator.filled { background-color: #10b981; }
+        .status-indicator.unfilled { background-color: #6a5acd; } /* لون بنفسجي هادئ */
+
+        /* رسالة التنبيه */
+        #messageBox {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #f44336;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            z-index: 100;
+            display: none;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            animation: fadeIn 0.5s, fadeOut 0.5s 2.5s forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background-color: #2c2c2c; /* لون داكن للمربع */
+            color: #f5f5f5; /* لون نص فاتح */
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        .modal-buttons {
+            margin-top: 20px;
+            display: flex;
+            justify-content: space-around;
+        }
+        .modal-buttons button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .modal-buttons .confirm {
+            background-color: #0e9680; /* لون أخضر هادئ */
+            color: white;
+        }
+        .modal-buttons .cancel {
+            background-color: #404040;
+            color: #f5f5f5;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <span id="gameDay">التاريخ: 2024-01-01</span>
+            <div class="header-text">
+                <span id="currentRound">الجولة: 1</span>
+            </div>
+            <button class="button button-gray" id="allUnknownBtn">الكل غير معروف</button>
+        </div>
+
+        <div class="section">
+            <h2>Hoah</h2>
+            <div class="button-grid" id="hoahButtons"></div>
+            <div class="status-indicator" id="hoahStatus"></div>
+        </div>
+
+        <div class="section">
+            <h2>Pro</h2>
+            <div class="button-grid" id="proButtons"></div>
+            <div class="status-indicator" id="proStatus"></div>
+        </div>
+
+        <div class="section">
+            <h2>World</h2>
+            <div class="button-grid" id="worldButtons"></div>
+            <div class="status-indicator" id="worldStatus"></div>
+        </div>
+        
+        <div class="controls">
+            <button class="download-btn" id="downloadCsvBtn">تنزيل السجل (CSV)</button>
+            <button class="reset-btn" id="startNewDayBtn">إنهاء اليوم الحالي</button>
+        </div>
+    </div>
+    
+    <div class="footer">
+        تطبيق تسجيل المباريات - بواسطة Gemini
+    </div>
+
+    <!-- نافذة التنبيه المخصصة -->
+    <div id="messageBox"></div>
+
+    <!-- نافذة التأكيد المخصصة -->
+    <div id="confirmModal" class="modal">
+        <div class="modal-content">
+            <p>هل أنت متأكد من أنك تريد إنهاء اليوم الحالي؟ سيتم إعادة ضبط الجولات لبدء يوم جديد.</p>
+            <div class="modal-buttons">
+                <button class="confirm" id="confirmResetBtn">تأكيد</button>
+                <button class="cancel" id="cancelResetBtn">إلغاء</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // هنا نبدأ ببرمجة منطق التطبيق
+        const TEAMS_DATA = {
+            Hoah: [ "Juventus", "Manchester", "AC_Milan", "Bayern", "PSG", "Liverpool", "Real_Madrid", "Barcelona", "Unknown" ],
+            Pro: [ "Al_Qadsia", "Sadd", "Zamalek", "Al_Nassr", "Raja", "Al_Ittihad", "Al_Ahly", "Al_Hilal", "Unknown" ],
+            World: [ "Spain", "Italy", "Argentina", "Portugal", "Germany", "England", "Brazil", "France", "Unknown" ]
+        };
+        
+        const MAX_ROUNDS = 2169; // أقصى عدد للجولات
+
+        let logData = [];
+        let currentSelections = { Hoah: null, Pro: null, World: null };
+        let currentRound = 1;
+        let gameDay = new Date(); // تخزين التاريخ ككائن
+
+        const elements = {
+            gameDaySpan: document.getElementById('gameDay'),
+            currentRoundSpan: document.getElementById('currentRound'),
+            hoahButtonsDiv: document.getElementById('hoahButtons'),
+            proButtonsDiv: document.getElementById('proButtons'),
+            worldButtonsDiv: document.getElementById('worldButtons'),
+            allUnknownBtn: document.getElementById('allUnknownBtn'),
+            downloadCsvBtn: document.getElementById('downloadCsvBtn'),
+            startNewDayBtn: document.getElementById('startNewDayBtn'),
+            hoahStatus: document.getElementById('hoahStatus'),
+            proStatus: document.getElementById('proStatus'),
+            worldStatus: document.getElementById('worldStatus'),
+            confirmModal: document.getElementById('confirmModal'),
+            confirmResetBtn: document.getElementById('confirmResetBtn'),
+            cancelResetBtn: document.getElementById('cancelResetBtn'),
+            messageBox: document.getElementById('messageBox')
+        };
+
+        // وظيفة لإظهار رسالة قصيرة للمستخدم
+        function showMessage(message) {
+            elements.messageBox.textContent = message;
+            elements.messageBox.style.display = 'block';
+            setTimeout(() => {
+                elements.messageBox.style.display = 'none';
+            }, 3000); // إخفاء الرسالة بعد 3 ثواني
+        }
+
+        // وظيفة لتنسيق التاريخ
+        function formatDate(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        // وظيفة لتحديث معلومات الرأس
+        function updateHeader() {
+            elements.gameDaySpan.textContent = `التاريخ: ${formatDate(gameDay)}`;
+            elements.currentRoundSpan.textContent = `الجولة: ${currentRound}`;
+        }
+
+        // وظيفة لرسم الأزرار
+        function renderButtons() {
+            renderSectionButtons('Hoah', elements.hoahButtonsDiv, 'button-hoah');
+            renderSectionButtons('Pro', elements.proButtonsDiv, 'button-pro');
+            renderSectionButtons('World', elements.worldButtonsDiv, 'button-world');
+            updateStatusIndicators();
+        }
+
+        // وظيفة لرسم الأزرار لكل قسم
+        function renderSectionButtons(section, container, buttonClass) {
+            container.innerHTML = '';
+            TEAMS_DATA[section].forEach(team => {
+                const button = document.createElement('button');
+                button.className = `button ${buttonClass}`;
+                button.textContent = team.replace(/_/g, ' '); // استبدال الشرطة السفلية بمسافة
+                button.dataset.section = section;
+                button.dataset.team = team;
+                button.addEventListener('click', handleButtonClick);
+                container.appendChild(button);
+            });
+        }
+
+        // وظيفة للتعامل مع نقرات الأزرار
+        function handleButtonClick(event) {
+            const section = event.target.dataset.section;
+            const team = event.target.dataset.team;
+            currentSelections[section] = team;
+            updateStatusIndicators();
+            checkAndAdvanceRound();
+        }
+
+        // وظيفة لتحديث حالة الأقسام (ممتلئة أم فارغة)
+        function updateStatusIndicators() {
+            updateIndicator(elements.hoahStatus, currentSelections.Hoah, 'Hoah');
+            updateIndicator(elements.proStatus, currentSelections.Pro, 'Pro');
+            updateIndicator(elements.worldStatus, currentSelections.World, 'World');
+        }
+
+        // وظيفة مساعدة لتحديث مؤشر واحد
+        function updateIndicator(indicator, value, sectionName) {
+            if (value) {
+                indicator.textContent = `تم اختيار: ${value.replace(/_/g, ' ')}`;
+                indicator.className = 'status-indicator filled';
+            } else {
+                indicator.textContent = `اختر ${sectionName}`;
+                indicator.className = 'status-indicator unfilled';
+            }
+        }
+
+        // وظيفة للتحقق من اكتمال الجولة والتقدم للجولة التالية
+        function checkAndAdvanceRound() {
+            if (currentSelections.Hoah && currentSelections.Pro && currentSelections.World) {
+                logRound();
+                if (currentRound >= MAX_ROUNDS) {
+                    startNewDayLogic(true); // بدء يوم جديد تلقائياً
+                } else {
+                    currentRound++;
+                    currentSelections = { Hoah: null, Pro: null, World: null };
+                    updateHeader();
+                    updateStatusIndicators();
+                }
+            }
+        }
+
+        // وظيفة لتسجيل الجولة في السجل
+        function logRound() {
+            const entry = {
+                GameDay: formatDate(gameDay),
+                Round: currentRound,
+                Hoah: currentSelections.Hoah,
+                Pro: currentSelections.Pro,
+                World: currentSelections.World,
+                CreatedAt: new Date().toISOString()
+            };
+            logData.push(entry);
+            console.log("تم تسجيل الجولة:", entry);
+        }
+        
+        // وظيفة التعامل مع زر "الكل غير معروف"
+        elements.allUnknownBtn.addEventListener('click', () => {
+            currentSelections.Hoah = "Unknown";
+            currentSelections.Pro = "Unknown";
+            currentSelections.World = "Unknown";
+            checkAndAdvanceRound();
+        });
+
+        // وظيفة تنزيل السجل كملف CSV
+        elements.downloadCsvBtn.addEventListener('click', () => {
+            if (logData.length === 0) {
+                showMessage("لا يوجد بيانات لتنزيلها.");
+                return;
+            }
+            const headers = ["GameDay", "Round", "Hoah", "Pro", "World", "CreatedAt"];
+            const csvContent = "data:text/csv;charset=utf-8," 
+                + headers.join(",") + "\n" 
+                + logData.map(e => headers.map(header => e[header]).join(",")).join("\n");
+            
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `log_${formatDate(gameDay)}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        });
+
+        // وظيفة بدء يوم جديد
+        function startNewDayLogic(isAuto = false) {
+            // لا يتم حذف البيانات القديمة، بل يتم فقط تحديث التاريخ وإعادة ضبط الجولات
+            currentRound = 1;
+            gameDay = new Date(gameDay.setDate(gameDay.getDate() + 1)); // زيادة التاريخ يوم واحد
+            currentSelections = { Hoah: null, Pro: null, World: null };
+            updateHeader();
+            updateStatusIndicators();
+            if (!isAuto) {
+                //alert("تم بدء يوم جديد بنجاح!");
+            }
+        }
+
+        // إظهار نافذة التأكيد عند الضغط على زر "بدء يوم جديد"
+        elements.startNewDayBtn.addEventListener('click', () => {
+            elements.confirmModal.style.display = 'flex';
+        });
+
+        // إخفاء النافذة عند الضغط على "إلغاء"
+        elements.cancelResetBtn.addEventListener('click', () => {
+            elements.confirmModal.style.display = 'none';
+        });
+
+        // تأكيد وبدء يوم جديد عند الضغط على "تأكيد"
+        elements.confirmResetBtn.addEventListener('click', () => {
+            startNewDayLogic();
+            elements.confirmModal.style.display = 'none';
+        });
+
+        // البدء عند تحميل الصفحة
+        window.onload = () => {
+            updateHeader();
+            renderButtons();
+        };
+
+    </script>
+</body>
+</html>
