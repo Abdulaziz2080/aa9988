@@ -199,6 +199,33 @@
             background-color: #404040;
             color: #f5f5f5;
         }
+        .round-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            align-items: center;
+            margin-top: 15px;
+        }
+        .round-controls input {
+            padding: 8px;
+            border-radius: 8px;
+            border: 1px solid #404040;
+            background-color: #2c2c2c;
+            color: #f5f5f5;
+            text-align: center;
+        }
+        .round-controls button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 8px;
+            background-color: #4682b4;
+            color: #f5f5f5;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .round-controls button:hover {
+            filter: brightness(1.1);
+        }
     </style>
 </head>
 <body>
@@ -209,6 +236,11 @@
                 <span id="currentRound">الجولة: 1</span>
             </div>
             <button class="button button-gray" id="allUnknownBtn">الكل غير معروف</button>
+            <!-- إضافة حقل الإدخال والزر الجديد -->
+            <div class="round-controls">
+                <input type="number" id="roundInput" placeholder="أدخل رقم الجولة">
+                <button id="setRoundBtn">تحديد الجولة</button>
+            </div>
         </div>
 
         <div class="section">
@@ -283,7 +315,9 @@
             confirmModal: document.getElementById('confirmModal'),
             confirmResetBtn: document.getElementById('confirmResetBtn'),
             cancelResetBtn: document.getElementById('cancelResetBtn'),
-            messageBox: document.getElementById('messageBox')
+            messageBox: document.getElementById('messageBox'),
+            roundInput: document.getElementById('roundInput'),
+            setRoundBtn: document.getElementById('setRoundBtn')
         };
 
         // وظيفة لإظهار رسالة قصيرة للمستخدم
@@ -393,6 +427,19 @@
             currentSelections.Pro = "Unknown";
             currentSelections.World = "Unknown";
             checkAndAdvanceRound();
+        });
+        
+        // وظيفة التعامل مع زر "تحديد الجولة"
+        elements.setRoundBtn.addEventListener('click', () => {
+            const roundNumber = parseInt(elements.roundInput.value);
+            if (!isNaN(roundNumber) && roundNumber > 0 && roundNumber <= MAX_ROUNDS) {
+                currentRound = roundNumber;
+                elements.roundInput.value = ''; // مسح حقل الإدخال
+                updateHeader();
+                showMessage(`تم تحديث الجولة إلى ${roundNumber}`);
+            } else {
+                showMessage("الرجاء إدخال رقم جولة صالح (1 إلى " + MAX_ROUNDS + ").");
+            }
         });
 
         // وظيفة تنزيل السجل كملف CSV
